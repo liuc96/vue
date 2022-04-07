@@ -31,6 +31,7 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  // 没有render 才去挂载 template
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -97,5 +98,5 @@ function getOuterHTML (el: Element): string {
 }
 
 Vue.compile = compileToFunctions
-
+// 除了 Vue 外还挂载了 compile 方法 和 $mount
 export default Vue

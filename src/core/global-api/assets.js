@@ -12,6 +12,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
       id: string,
       definition: Function | Object
     ): Function | Object | void {
+      // 没传第二个参数，代表去 Vue 里获取
       if (!definition) {
         return this.options[type + 's'][id]
       } else {

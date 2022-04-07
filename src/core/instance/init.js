@@ -13,11 +13,14 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  // 给 vm 添加 _init 方法
+  // 合并 options/初始化操作
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
     vm._uid = uid++
 
+    // 开发环境性能检测性能
     let startTag, endTag
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -27,9 +30,12 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // a flag to avoid this being observed
+    // 如果是 Vue 实例不需要被 observe
     vm._isVue = true
     // merge options
-    if (options && options._isComponent) {
+    // 合并 options
+    // 将 Vue 的 options 合并到 vm.$options 上
+    if (options && options._isComponent) { // 组件
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
@@ -43,19 +49,30 @@ export function initMixin (Vue: Class<Component>) {
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // vm._renderProxy = vm
       initProxy(vm)
     } else {
       vm._renderProxy = vm
     }
     // expose real self
     vm._self = vm
+    // vm 生命周期相关变量初始化
+    // $children/$parent/$root/$refs
     initLifecycle(vm)
+    // vm 的事件监听初始化，父组件绑定在当前组件上的事件
     initEvents(vm)
+    // vm 的编译 render 初始化
+    // $slots/$scopedSlots/_c/$createElement/$attrs/$listeners
     initRender(vm)
+    // 触发生命周期🪝 beforeCreate
     callHook(vm, 'beforeCreate')
+    // 把 inject 的成员注入到 vm‘ 上
     initInjections(vm) // resolve injections before data/props
+    // 初始化 vm 的 _prop/methods/_data/computed/watch
     initState(vm)
+    // 初始化 provide
     initProvide(vm) // resolve provide after data/props
+    // 触发生命周期🪝 created
     callHook(vm, 'created')
 
     /* istanbul ignore if */

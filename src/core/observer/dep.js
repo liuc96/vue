@@ -49,17 +49,23 @@ export default class Dep {
   }
 }
 
+
+// Dep.target 用来存放目前正在使用的 watcher
+// 全局唯一，并且一次也只能有一个 watcher 被使用
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
 Dep.target = null
 const targetStack = []
 
+// 在 vue 2.0 以后每个组件都有一个 watcher 对象，当组件嵌套组件的时候，就需要 进出栈操作
+// 进栈，并将当前 watcher 赋值给 Dep.targe
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)
   Dep.target = target
 }
 
+// 出栈
 export function popTarget () {
   targetStack.pop()
   Dep.target = targetStack[targetStack.length - 1]

@@ -49,8 +49,12 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
+  // 将 props 挂载到 vm._props 上，访问 props 就是访问 vm._props
   if (opts.props) initProps(vm, opts.props)
+  // 把 methods 注入到 vm 上，并且判断了 props上是否有重名属性
+  // 不建议 $/_  开头
   if (opts.methods) initMethods(vm, opts.methods)
+  // 挂载 data
   if (opts.data) {
     initData(vm)
   } else {
@@ -115,6 +119,8 @@ function initData (vm: Component) {
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+
+  // 如果不是一个纯粹的 js 对象
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -128,6 +134,7 @@ function initData (vm: Component) {
   const props = vm.$options.props
   const methods = vm.$options.methods
   let i = keys.length
+  // 检测 key 在不在 props 或 methods 里
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {

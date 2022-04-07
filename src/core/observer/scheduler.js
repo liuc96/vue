@@ -73,6 +73,16 @@ function flushSchedulerQueue () {
   flushing = true
   let watcher, id
 
+
+  // 刷新前对队列进行排序。
+  // 这可确保：
+  // 1. 组件从父级更新到子级。（因为父母总是
+  //    在孩子之前创建）
+  // 2. 组件的用户观察程序在其渲染观察程序之前运行（因为
+  //    用户观察程序在渲染观察程序之前创建）
+  // 3. 如果某个组件在父组件的观察程序运行期间被销毁
+  //    它的观察者可以跳过。
+
   // Sort queue before flush.
   // This ensures that:
   // 1. Components are updated from parent to child. (because parent is always
