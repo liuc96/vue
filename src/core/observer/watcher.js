@@ -77,9 +77,12 @@ export default class Watcher {
       ? expOrFn.toString()
       : ''
     // parse expression for getter
+    // 如果是编译的 watcher，expOrFn 是函数，用来更新dom
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
+      // 当 expOrFn 是一个字符串的时候，例如：watch: { 'person.name': function () {} }
+      // parsePath(expOrFn) 返回一个函数，获取 person.name 的值
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
@@ -229,6 +232,10 @@ export default class Watcher {
       // remove self from vm's watcher list
       // this is a somewhat expensive operation so we skip it
       // if the vm is being destroyed.
+
+      // 从vm的观察者列表中删除self
+      // 这是一个有点昂贵的操作，所以我们跳过它
+      // 如果虚拟机正在被销毁。
       if (!this.vm._isBeingDestroyed) {
         remove(this.vm._watchers, this)
       }

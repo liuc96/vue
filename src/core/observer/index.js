@@ -35,21 +35,28 @@ export function toggleObserving (value: boolean) {
  * collect dependencies and dispatch updates.
  */
 export class Observer {
+    // 观测对象
   value: any;
+    // 依赖对象
   dep: Dep;
+    // 实例计数器
   vmCount: number; // number of vms that have this object as root $data
 
   constructor (value: any) {
     this.value = value
     this.dep = new Dep()
+    // 初始化实例的 vmCount 为 0
     this.vmCount = 0
+    // 将实例挂载到观察对象的 __ob__ 属性
     def(value, '__ob__', this)
+    // 数组的响应式处理
     if (Array.isArray(value)) {
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
+      // 为数组的每个对象创建一个 observer 实例
       this.observeArray(value)
     } else {
       this.walk(value)
@@ -172,7 +179,7 @@ export function defineReactive (
         // 如果子观察目标存在，建立子对象的依赖目标
         if (childOb) {
           childOb.dep.depend()
-          // 如果属性是数组，则特殊处理手机数组对象依赖
+          // 如果属性是数组，则特殊处理收集数组对象依赖
           if (Array.isArray(value)) {
             dependArray(value)
           }
@@ -218,21 +225,28 @@ export function defineReactive (
  * already exist.
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
+  // 原始值或undefined会发送一个警告
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 判断 target 是否是数组，key 是否是合法的索引
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
+    // 通过 splice 对 key 位置的索引进行替换
+    // splice 在 array.js 进行了响应化的处理
     target.splice(key, 1, val)
     return val
   }
+  // 如果 key 在对象中已经存在直接赋值
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
+  // 获取 target 的 observer 对象
   const ob = (target: any).__ob__
+  // 如果 target 是 vue 实例或者 $data 直接返回
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -240,11 +254,14 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
+  // 如果 ob 不存在，target 不是响应式对象直接赋值
   if (!ob) {
     target[key] = val
     return val
   }
+  // 把 key 设置为响应式属性
   defineReactive(ob.value, key, val)
+  // 发送通知
   ob.dep.notify()
   return val
 }
@@ -253,16 +270,23 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
  * Delete a property and trigger change if necessary.
  */
 export function del (target: Array<any> | Object, key: any) {
+  // 不能在 undefined 或者 null 上调用 delete ，不能在原始值上调用 delete
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 判断是否是数组，以及 key 是否合法
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 如果是数组通过 splice 删除
+    // splice 做过响应式处理
     target.splice(key, 1)
     return
   }
+
+  // 获取 target 的 observer 对象
   const ob = (target: any).__ob__
+  // 如果 target 是 vue 实例或者 $data 直接返回
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
@@ -270,6 +294,7 @@ export function del (target: Array<any> | Object, key: any) {
     )
     return
   }
+  // 如果 target 对象没有 key 属性，直接返回
   if (!hasOwn(target, key)) {
     return
   }

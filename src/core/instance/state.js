@@ -49,7 +49,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
-  // 将 props 挂载到 vm._props 上，访问 props 就是访问 vm._props
+  // 把 props 挂载到 vm._props 上，访问 props 就是访问 vm._props
   if (opts.props) initProps(vm, opts.props)
   // 把 methods 注入到 vm 上，并且判断了 props上是否有重名属性
   // 不建议 $/_  开头
@@ -60,7 +60,9 @@ export function initState (vm: Component) {
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
+  // 挂载 computed
   if (opts.computed) initComputed(vm, opts.computed)
+  // 挂载 watch
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }

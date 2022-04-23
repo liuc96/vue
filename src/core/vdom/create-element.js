@@ -51,6 +51,16 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+  // 这里的 tag 可能是一个类，也可能是一个函数，也可能是一个对象
+  // 如果是一个类，则直接创建一个类实例
+  // 如果是一个函数，则调用这个函数，并且返回一个 VNode
+  // 如果是一个对象，则直接返回这个对象
+  // 如果是一个数组，则创建一个空的 VNode
+  // 如果是一个 null 或者 undefined，则创建一个空的 VNode
+  // 如果是一个 VNode，则直接返回这个 VNode
+  // 如果是一个 VNode 列表，则直接返回这个 VNode 列表
+
+  // 如果 data 是一个观察者对象，返回一个空的注释节点 VNode
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -59,14 +69,18 @@ export function _createElement (
     )
     return createEmptyVNode()
   }
+  // <component v-bind:is="currentTabComponent" />
   // object syntax in v-bind
+  // 如果有 component 的 is 属性，记录到 tag 里来
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
+  // 如果有 component 的 is 属性 设置为 falsy，返回一个空的注释节点 VNode
   if (!tag) {
     // in case of component :is set to falsy value
     return createEmptyVNode()
   }
+  // 检查 key 的属性是否是一个原始值
   // warn against non-primitive key
   if (process.env.NODE_ENV !== 'production' &&
     isDef(data) && isDef(data.key) && !isPrimitive(data.key)
@@ -79,6 +93,7 @@ export function _createElement (
       )
     }
   }
+  // 处理作用域插槽 TODO
   // support single function children as default scoped slot
   if (Array.isArray(children) &&
     typeof children[0] === 'function'
@@ -87,15 +102,20 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
+  // 处理 children
   if (normalizationType === ALWAYS_NORMALIZE) {
+    // 此时执行的是用户传递的 render 函数
+    // 返回一维数组
     children = normalizeChildren(children)
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
   let vnode, ns
+  // 如果是 tag 一个字符串
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    // 如果是 tag 一个 HTML 保留标签
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
@@ -104,12 +124,16 @@ export function _createElement (
           context
         )
       }
+      // context 是 vm
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
+      // 判断是否是自定义组件
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
+      // 查找自定义是组件构造函数的声明
+      // 根据 Ctor 创建组件的 VNode TODO
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
@@ -127,6 +151,7 @@ export function _createElement (
   if (Array.isArray(vnode)) {
     return vnode
   } else if (isDef(vnode)) {
+    // 处理命名空间
     if (isDef(ns)) applyNS(vnode, ns)
     if (isDef(data)) registerDeepBindings(data)
     return vnode
